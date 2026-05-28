@@ -1,0 +1,6 @@
+data/
+*.csv
+*.db
+mlruns/
+__pycache__/
+*.pyc
