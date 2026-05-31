@@ -67,3 +67,28 @@ print("2. Fraud rate is only 0.2% - very rare")
 print("3. Financial services is the most popular category (47%)")
 print("4. Channel 3 dominates with 59% of transactions")
 print("5. Transaction amounts vary widely - some negative (refunds)")
+
+# Correlation matrix
+import seaborn as sns
+num_cols = ['Amount', 'Value', 'PricingStrategy', 'FraudResult']
+corr = df[num_cols].corr()
+print("\nCorrelation matrix:")
+print(corr)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax, fmt='.2f')
+ax.set_title('Correlation Matrix of Numerical Features')
+plt.tight_layout()
+plt.savefig('reports/correlation_chart.png', dpi=100)
+print("Correlation chart saved!")
+
+# Box plot for outliers
+fig, ax = plt.subplots(figsize=(10, 5))
+df.boxplot(column='Amount', ax=ax)
+ax.set_title('Box Plot of Transaction Amounts (Outlier Detection)')
+ax.set_ylabel('Amount')
+plt.tight_layout()
+plt.savefig('reports/boxplot_chart.png', dpi=100)
+print("Box plot saved!")
+
+print("\nDone with all EDA!")
