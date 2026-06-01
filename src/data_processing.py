@@ -47,3 +47,55 @@ if __name__ == "__main__":
     print(f"Aggregated: {agg.shape}")
     agg.to_csv('data/processed/aggregate_features.csv', index=False)
     print("Saved to data/processed/")
+
+def calculate_rfm(df, snapshot_date=None):
+    """Calculate Recency, Frequency, Monetary per customer."""
+    if snapshot_date is None:
+        snapshot_date = df['TransactionStartTime'].max() + pd.Timedelta(days=1)
+    
+    rfm = df.groupby('CustomerId').agg(
+        Recency=('TransactionStartTime', lambda x: (snapshot_date - x.max()).days),
+        Frequency=('TransactionId', 'count'),
+        Monetary=('Amount', 'sum')
+    ).reset_index()
+    
+    return rfm
+
+def create_risk_label(df, rfm, random_state=42):
+    """Create is_high_risk using K-Means clustering on RFM."""
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.cluster import KMeans
+    
+    features = ['Recency', 'Frequency', 'Monetary']
+    X = rfm[features].copy()
+    
+    # Scale
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    # Cluster into 3 groups
+    kmeans = KMeans(n_clusters=3, random_state=random_state, n_init=10)
+    rfm['cluster'] = kmeans.fit_predict(X_scaled)
+    
+    # Find highest risk cluster (lowest Frequency and Monetary)
+    cluster_stats = rfm.groupby('cluster')[['Frequency', 'Monetary']].mean()
+    high_risk_cluster = cluster_stats['Frequency'].idxmin()
+    
+    # Create label
+    rfm['is_high_risk'] = (rfm['cluster'] == high_risk_cluster).astype(int)
+    
+    print(f"Cluster stats:\n{cluster_stats}")
+    print(f"High risk cluster: {high_risk_cluster}")
+    print(f"High risk customers: {rfm['is_high_risk'].sum()}")
+    print(f"Low risk customers: {(rfm['is_high_risk'] == 0).sum()}")
+    
+    return rfm
+
+if __name__ == "__main__":
+    df, agg = process_data()
+    print("\nCalculating RFM...")
+    rfm = calculate_rfm(df)
+    print("\nCreating risk labels...")
+    rfm = create_risk_label(df, rfm)
+    rfm.to_csv('data/processed/rfm_with_risk.csv', index=False)
+    print("\nSaved to data/processed/")
