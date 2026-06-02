@@ -99,3 +99,12 @@ if __name__ == "__main__":
     rfm = create_risk_label(df, rfm)
     rfm.to_csv('data/processed/rfm_with_risk.csv', index=False)
     print("\nSaved to data/processed/")
+
+def safe_load_data(filepath):
+    import os
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"File not found: {filepath}")
+    try:
+        return pd.read_csv(filepath)
+    except Exception as e:
+        raise ValueError(f"Error reading file: {e}")

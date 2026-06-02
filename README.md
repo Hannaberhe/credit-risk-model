@@ -13,3 +13,11 @@ The data we have is transaction data from an eCommerce platform. There is no col
 ### 3. Simple vs Complex Models
 
 A simple model like Logistic Regression is easy to explain. We can say "this customer got a low score because of X and Y." Regulators like this. A complex model like XGBoost may predict better but is harder to explain. In banking, being able to explain your decision often matters more than a small improvement in accuracy. We will try both and compare.
+
+## EDA Key Insights
+1. 95,662 transactions with zero missing values
+2. Financial services and airtime are 95% of transactions
+3. Channel 3 dominates with 59% of all transactions
+4. Fraud is very rare at only 0.2%
+5. Amount and Value are 99% correlated
+6. Transaction amounts are highly skewed with outliers
